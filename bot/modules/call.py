@@ -21,10 +21,10 @@ def file_del(gid):
         del_result=dele.remove(force=True, files=True)
         if del_result==True:
             print(f"{torrent_name}\n删除成功")
-            return f"删除成功"
+            return "删除成功"
         else:
             print(f"{torrent_name}\n删除失败")
-            return f"删除失败"
+            return "删除失败"
     except Exception as e:
         print (e)
         return f"\n删除失败：{e}"
@@ -37,10 +37,10 @@ def file_resume(gid):
         resume_result=the_resume.resume()
         if resume_result==True:
             print(f"{torrent_name}\n开始成功")
-            return f"开始成功"
+            return "开始成功"
         else:
             print(f"{torrent_name}\n开始失败")
-            return f"开始失败"
+            return "开始失败"
     except Exception as e:
         print (e)
         return f"\n开始失败：{e}"
@@ -53,10 +53,10 @@ def file_pause(gid):
         resume_result=the_pause.pause()
         if resume_result==True:
             print(f"{torrent_name}\n暂停成功")
-            return f"暂停成功"
+            return "暂停成功"
         else:
             print(f"{torrent_name}\n暂停失败")
-            return f"暂停失败"
+            return "暂停失败"
     except Exception as e:
         print (e)
         return f"\n暂停失败：{e}"
@@ -77,13 +77,13 @@ def start_pause(client, message):
     client.answer_callback_query(callback_query_id=message.id, text=info_text, cache_time=3)
 
 def start_benzi_down(client, message):
-    if "down" == message.data:
+    if message.data == "down":
 
         client.answer_callback_query(callback_query_id=message.id, text="开始下载", cache_time=3)
 
         add_download(client=client, call=message)
 
-    elif "tgdown" == message.data:
+    elif message.data == "tgdown":
 
         client.answer_callback_query(callback_query_id=message.id, text="开始下载", cache_time=3)
 
@@ -134,10 +134,11 @@ def get_song_url_info(client, call):
             "User-Agent": "Mozilla/5.0 (Windows NT 5.8; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.86 Safari/537.36",
             "cookie": "__remember_me=true; MUSIC_U=f5798cb7775288f521fdcc5e3ce3df53b94446c1f5306aea19f4b0354b15433833a649814e309366; __csrf=b23ac1873ea3b243dbd6412b488600b1; NMTID=00O-ApuqR6H-n1NEEJFpS0RgQBBbVwAAAF6OLF0aw"
             }
-        song_info_url = f"https://benchaonetease.vercel.app/song/url?id={song_id}&br=999000&timestamp={str(int(round(t * 1000)))}"
+        song_info_url = f"https://benchaonetease.vercel.app/song/url?id={song_id}&br=999000&timestamp={int(round(t * 1000))}"
+
         song_info = requests.get(url=song_info_url,headers=headers)
         try:
-            if song_info.json()['data'][0]['url']==None:
+            if song_info.json()['data'][0]['url'] is None:
 
                 client.edit_message_text(text="此歌曲不支持获取歌曲链接", chat_id=message_chat_id,
                                                    message_id=message_id,

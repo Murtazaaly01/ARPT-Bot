@@ -53,86 +53,88 @@ async def send_photo(client, message):
 
 
 def saucenao(client, message):
-    try:
-        print(message)
-        url="https://saucenao.com/search.php"
-        #url = "https://saucenao.com"
-        Header = {
-            'Host': 'saucenao.com',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
-             'Accept': 'text / html, application / xhtml + xml, application / xml;q = 0.9, * / *;q = 0.8',
-            'Accept - Language': 'zh - CN, zh;q = 0.8, zh - TW;q = 0.7, zh - HK;q = 0.5, en - US;q = 0.3, en;q = 0.2',
-             'Accept - Encoding': 'gzip, deflate, br',
-            'Connection': 'keep - alive',
+  try:
+    print(message)
+    url="https://saucenao.com/search.php"
+    #url = "https://saucenao.com"
+    Header = {
+        'Host': 'saucenao.com',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
+         'Accept': 'text / html, application / xhtml + xml, application / xml;q = 0.9, * / *;q = 0.8',
+        'Accept - Language': 'zh - CN, zh;q = 0.8, zh - TW;q = 0.7, zh - HK;q = 0.5, en - US;q = 0.3, en;q = 0.2',
+         'Accept - Encoding': 'gzip, deflate, br',
+        'Connection': 'keep - alive',
 
-        }
-        payloaddata = {
+    }
+    payloaddata = {
 
-            'frame': 1,
-            'hide': 0,
-            'database': 999,
-        }
-        #files = { "file": ('saber.jpg', open("saber.jpg", "rb", , "image/png")}
+        'frame': 1,
+        'hide': 0,
+        'database': 999,
+    }
+    #files = { "file": ('saber.jpg', open("saber.jpg", "rb", , "image/png")}
 
-        file = client.download_media(message=message.message)
+    file = client.download_media(message=message.message)
 
 
-        files={"file" : ("saber.jpg", open(file, "rb"), "image/png" )}
+    files={"file" : ("saber.jpg", open(file, "rb"), "image/png" )}
 
-        #files = {"file": ("saucenao.jpg", file, "image/png")}
-        client.send_message(chat_id=message.message.chat.id,text="正在搜索saucenao")
-        search_result = session.post(url=url, headers=Header, data=payloaddata,files=files)
+    #files = {"file": ("saucenao.jpg", file, "image/png")}
+    client.send_message(chat_id=message.message.chat.id,text="正在搜索saucenao")
+    search_result = session.post(url=url, headers=Header, data=payloaddata,files=files)
 
-        #print(soup.prettify())
+    #print(soup.prettify())
 
-        lxml_result = etree.HTML(search_result.text)
-        title_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[2]/div[2]/div[1]/strong/text()')
-        info_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[2]/div[2]/div[1]/small/text()')
-        similarity_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[2]/div[1]/div[1]/text()')
-        img_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[1]/div/a/img/@src')
-        link_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[1]/div/a/@href')
-        print(title_list)
-        print(info_list)
-        print(similarity_list)
-        print(img_list)
-        print(link_list)
-        for title, info, similarity, img, link in zip(title_list, info_list, similarity_list, img_list, link_list):
-            text = f"标题:`{title}`\n" \
-                   f"简介:`{info}`\n" \
-                   f"相似度:`{similarity}`\n" \
-                   f"[更多信息]({link})"
-            try:
-                new_inline_keyboard = [
-                    [
-                        InlineKeyboardButton(
-                            text="搜索ehentai",
-                            callback_data=f"searche {str(title)[0:32]}"
-                        )], [
-                        InlineKeyboardButton(
-                            text="搜索nhentai",
-                            callback_data=f"searchn {str(title)[0:32]}"
-                        )], [
-                        InlineKeyboardButton(
-                            text="搜索哔咔",
-                            callback_data=f"searchp {str(title)[0:32]}"
-                        )
-                    ]
-                ]
+    lxml_result = etree.HTML(search_result.text)
+    title_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[2]/div[2]/div[1]/strong/text()')
+    info_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[2]/div[2]/div[1]/small/text()')
+    similarity_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[2]/div[1]/div[1]/text()')
+    img_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[1]/div/a/img/@src')
+    link_list = lxml_result.xpath('//*[@id="middle"]/div/table/tr/td[1]/div/a/@href')
+    print(title_list)
+    print(info_list)
+    print(similarity_list)
+    print(img_list)
+    print(link_list)
+    for title, info, similarity, img, link in zip(title_list, info_list, similarity_list, img_list, link_list):
+      text = f"标题:`{title}`\n" \
+             f"简介:`{info}`\n" \
+             f"相似度:`{similarity}`\n" \
+             f"[更多信息]({link})"
+      try:
+        new_inline_keyboard = [
+            [
+                InlineKeyboardButton(
+                    text="搜索ehentai",
+                    callback_data=f"searche {str(title)[:32]}",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="搜索nhentai",
+                    callback_data=f"searchn {str(title)[:32]}",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="搜索哔咔", callback_data=f"searchp {str(title)[:32]}")
+            ],
+        ]
 
-                new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
+        new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
 
-                client.send_photo(chat_id=message.message.chat.id,photo=img,reply_markup=new_reply_markup,parse_mode='markdown',caption=text)
-            except Exception as e:
-                print(e)
-                continue
+        client.send_photo(chat_id=message.message.chat.id,photo=img,reply_markup=new_reply_markup,parse_mode='markdown',caption=text)
+      except Exception as e:
+          print(e)
+          continue
 
-        os.remove(file)
-    except Exception as e:
-        print(f"saucenao:{e}")
-        try:
-            os.remove(file)
-        except:
-            None
+    os.remove(file)
+  except Exception as e:
+      print(f"saucenao:{e}")
+      try:
+          os.remove(file)
+      except:
+          None
 
 
 def ascii2d(client, message):
@@ -240,53 +242,53 @@ def anime(client, message):
         os.remove(file)
 
 def iqdb(client, message):
-    try:
-        client.send_message(chat_id=message.message.chat.id, text="正在搜索 iqdb", parse_mode="Markdown")
-        url = "http://iqdb.org/"
-        # url = "https://saucenao.com"
+  try:
+    client.send_message(chat_id=message.message.chat.id, text="正在搜索 iqdb", parse_mode="Markdown")
+    url = "http://iqdb.org/"
+    # url = "https://saucenao.com"
 
 
 
-        file = client.download_media(message=message.message)
+    file = client.download_media(message=message.message)
 
 
-        files = {"file": (
-            "iqdb.jpg", open(file, "rb"), "image/png")}
+    files = {"file": (
+        "iqdb.jpg", open(file, "rb"), "image/png")}
 
 
-        # files = {"file": "file": ('saber.jpg', open("saber.jpg", "rb", , "image/png")}
+    # files = {"file": "file": ('saber.jpg', open("saber.jpg", "rb", , "image/png")}
 
-        r = requests.post(url=url, files=files)
+    r = requests.post(url=url, files=files)
 
 
-        soup = BeautifulSoup(r.text, 'html.parser')
-        a=1
-        for img in soup.find_all('td', attrs={'class': 'image'}):  # 找到class="wrap"的div里面的所有<img>标签
-            #print(img)
-            if a==7:
-                break
-            try:
-                #print(img.a.get('href'))
-                img_html=img.a.get('href')
-                if "http:" not in img_html and "https:" not in img_html:
+    soup = BeautifulSoup(r.text, 'html.parser')
+    a=1
+    for img in soup.find_all('td', attrs={'class': 'image'}):  # 找到class="wrap"的div里面的所有<img>标签
+      #print(img)
+      if a==7:
+          break
+      try:
+        #print(img.a.get('href'))
+        img_html=img.a.get('href')
+        if "http:" not in img_html and "https:" not in img_html:
 
-                    img_html="https:"+img_html
+          img_html = f"https:{img_html}"
 
-                img_url="http://iqdb.org"+img.img.get('src')
+        img_url="http://iqdb.org"+img.img.get('src')
 
-                text=f"[图片详情]({img_html})"
-                #photo_file = session.get(img_url)
-                client.send_photo(chat_id=message.message.chat.id, photo=img_url, parse_mode='Markdown', caption=text)
-                a=a+1
-            except:
-                None
+        text=f"[图片详情]({img_html})"
+        #photo_file = session.get(img_url)
+        client.send_photo(chat_id=message.message.chat.id, photo=img_url, parse_mode='Markdown', caption=text)
+        a=a+1
+      except:
+          None
 
-        client.send_message(chat_id=message.message.chat.id, text="搜索完成", parse_mode="markdown")
-        os.remove(file)
+    client.send_message(chat_id=message.message.chat.id, text="搜索完成", parse_mode="markdown")
+    os.remove(file)
 
-    except Exception as e:
-        print(f"iqdb faild:{e}")
-        os.remove(file)
+  except Exception as e:
+      print(f"iqdb faild:{e}")
+      os.remove(file)
 
 
 def search_all_photo(client, message):

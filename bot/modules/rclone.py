@@ -14,9 +14,9 @@ def hum_convert(value):
     value=float(value)
     units = ["B", "KB", "MB", "GB", "TB", "PB"]
     size = 1024.0
-    for i in range(len(units)):
+    for unit in units:
         if (value / size) < 1:
-            return "%.2f%s" % (value, units[i])
+            return "%.2f%s" % (value, unit)
         value = value / size
 
 
@@ -27,7 +27,10 @@ async def start_rclonecopy(client, message):
         print(f"rclone {firstdir} {seconddir}")
         sys.stdout.flush()
         rc_url = f"http://root:{Aria2_secret}@127.0.0.1:5572"
-        info = await client.send_message(chat_id=message.chat.id, text=f"添加任务:", parse_mode='markdown')
+        info = await client.send_message(
+            chat_id=message.chat.id, text="添加任务:", parse_mode='markdown'
+        )
+
 
         rcd_copyfile_url = f"{rc_url}/sync/copy"
 
@@ -47,15 +50,10 @@ async def start_rclonecopy(client, message):
         while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
 
             job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
-            
+
             if "transferring" in job_status:
 
-                if job_status['eta'] == None:
-                    eta = "暂无"
-                else:
-                    eta = cal_time(job_status['eta'])
-                
-
+                eta = "暂无" if job_status['eta'] is None else cal_time(job_status['eta'])
                 text = f"任务ID:`{jobid}`\n" \
                        f"源地址:`{firstdir}`\n" \
                        f"目标地址:`{seconddir}`\n" \
@@ -124,7 +122,7 @@ async def start_rclonecopyurl(client, message):
 
             if "transferring" in job_status:
 
-                if job_status['transferring'][0]['eta'] == None:
+                if job_status['transferring'][0]['eta'] is None:
                     eta = "暂无"
                 else:
                     eta = cal_time(job_status['transferring'][0]['eta'])
@@ -166,7 +164,10 @@ async def start_rclonelsd(client, message):
         print(out)
         i = str(out,encoding='utf-8').replace("          ","")
         print(i)
-        await client.send_message(chat_id=message.chat.id,text=f"`{str(i)}`",parse_mode='markdown')
+        await client.send_message(
+            chat_id=message.chat.id, text=f"`{i}`", parse_mode='markdown'
+        )
+
     except Exception as e:
         print(f"rclonelsd :{e}")
         sys.stdout.flush()
@@ -189,7 +190,7 @@ async def start_rclonels(client, message):
             new=json.loads(a)
             print(new)
             filetime=str(new['ModTime']).replace("T"," ").replace("Z"," ")
-            text=text+f"{filetime}--{new['Name']}\n"
+            text = f"{text}{filetime}--{new['Name']}\n"
         await client.send_message(chat_id=message.chat.id,text=f"`{text}`",parse_mode='markdown')
     except Exception as e:
         print(f"rclone :{e}")

@@ -27,9 +27,7 @@ def change_password():
     change_url = "http://127.0.0.1:9184/api/users/1"
 
     print(html.text)
-    headers = {}
-    headers['Cookie'] = f"auth={html.text}"
-
+    headers = {'Cookie': f"auth={html.text}"}
     zh_data = {
         "data": {
             "hideDotfiles": False,
@@ -46,7 +44,7 @@ def change_password():
     }
 
     change_result = requests.put(url=change_url, json=zh_data, headers=headers)
-    
+
     if change_result.status_code==403:
         headers['X-Auth']=html.text
         change_result = requests.put(url=change_url, json=zh_data, headers=headers)
@@ -67,16 +65,13 @@ change_password()
 
 try:
     App_title=os.environ.get('Title')
-    if App_title ==None:
+    if App_title is None:
         App_title=""
 except:
     App_title=""
 
 try:
-    if os.environ.get('Rclone_share')=="True":
-        Rclone_share=True
-    else:
-        Rclone_share=False
+    Rclone_share = os.environ.get('Rclone_share') == "True"
 except:
     Rclone_share=False
 
@@ -84,7 +79,7 @@ print(f"是否rclone_share:{Rclone_share}")
 
 try:
     Error_user_info=os.environ.get('Error_user_info')
-    if Error_user_info ==None:
+    if Error_user_info is None:
         Error_user_info="未在使用白名单"
 except:
     Error_user_info="未在使用白名单"

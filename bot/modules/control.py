@@ -44,7 +44,7 @@ async def getpassword(iurl, password):
     _cookie = await page.cookies()
     pheader = ""
     for __cookie in _cookie:
-        coo = "{}={};".format(__cookie.get("name"), __cookie.get("value"))
+        coo = f'{__cookie.get("name")}={__cookie.get("value")};'
         pheader += coo
     await browser.close()
     return pheader,url

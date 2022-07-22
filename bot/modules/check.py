@@ -31,10 +31,9 @@ def second_clock():
         if "transferring" in job_status:
             print("rclone 正在上传")
             print(requests.get(url=f"http://{App_title}.herokuapp.com/"))
-            sys.stdout.flush()
-
         else:
             print("rclone 不在运行")
-            sys.stdout.flush()
+        sys.stdout.flush()
+
     except Exception as e:
         print(f"second_clock :{e}")

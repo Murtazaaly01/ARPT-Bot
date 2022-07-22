@@ -26,7 +26,7 @@ async def start_down_telegram_file(client, message,file_list):
             media=await client.get_media_group(chat_id=info.chat.id,message_id=info.message_id)
             print(media)
             for a in media:
-                if a.document == None and a.video == None:
+                if a.document is None and a.video is None:
                     await client.send_message(text="发送的不是文件", chat_id=message.chat.id, parse_mode='markdown')
                     await start_down_telegram_file(client, message, file_list)
                     return file_list
@@ -43,7 +43,7 @@ async def start_down_telegram_file(client, message,file_list):
         elif info.text == "/finish":
             await client.send_message(text=f"接收文件完成,共有{len(file_list)}个文件", chat_id=message.chat.id, parse_mode='markdown')
             return file_list
-        elif info.document == None and info.video == None:
+        elif info.document is None and info.video is None:
             await client.send_message(text="发送的不是文件", chat_id=message.chat.id, parse_mode='markdown')
             await start_down_telegram_file(client, message,file_list)
             return file_list
@@ -111,19 +111,17 @@ async def get_telegram_file(client, message):
         print(temp)
         print(type(temp))
         sys.stdout.flush()
-        
+
         if len(temp)==0:
-            return
+            pass
         elif len(temp)==1:
             t1 = threading.Thread(target=tgfile_download, args=(client, message, temp[0]))
             t1.start()
-            return
-
         else:
             for a in temp:
                 t1 = threading.Thread(target=tgfile_download, args=(client, message, a))
                 t1.start()
-            return
+        return
     except Exception as e:
         print(f"start_down_telegram_file {e}")
         await client.send_message(text=f"下载文件失败:{e}", chat_id=message.chat.id, parse_mode='markdown')
@@ -141,7 +139,7 @@ async def get_file_id(client, message):
         if info.text == "/cancel":
             await client.send_message(text="取消发送", chat_id=message.chat.id, parse_mode='markdown')
             return
-        elif info.document == None:
+        elif info.document is None:
             await client.send_message(text="发送的不是文件", chat_id=message.chat.id, parse_mode='markdown')
             return
 

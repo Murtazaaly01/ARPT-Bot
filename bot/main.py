@@ -138,7 +138,7 @@ async def status(client, message):
     print("%02d时%02d分%02d秒" % (h, m, s))
     if h != 0:
         last_time = "%d时%d分%d秒" % (h, m, s)
-    elif h == 0 and m != 0:
+    elif m != 0:
         last_time = "%d分%d秒" % (m, s)
     else:
         last_time = "%d秒" % s
@@ -382,25 +382,32 @@ def start_bot():
 
     saucenao_handler = CallbackQueryHandler(
         callback=saucenao,
-        filters=filters.create(lambda _, __, query: "saucenao" == query.data)
+        filters=filters.create(lambda _, __, query: query.data == "saucenao"),
     )
+
     ascii2d_handler = CallbackQueryHandler(
         callback=ascii2d,
-        filters=filters.create(lambda _, __, query: "ascii2d" == query.data)
+        filters=filters.create(lambda _, __, query: query.data == "ascii2d"),
     )
+
     anime_handler = CallbackQueryHandler(
         callback=anime,
-        filters=filters.create(lambda _, __, query: "WhatAnime" == query.data)
+        filters=filters.create(lambda _, __, query: query.data == "WhatAnime"),
     )
+
     iqdb_handler = CallbackQueryHandler(
         callback=iqdb,
-        filters=filters.create(lambda _, __, query: "iqdb" == query.data)
+        filters=filters.create(lambda _, __, query: query.data == "iqdb"),
     )
+
 
     search_all_photo_handler = CallbackQueryHandler(
         callback=search_all_photo,
-        filters=filters.create(lambda _, __, query: "allsearchphoto" == query.data)
+        filters=filters.create(
+            lambda _, __, query: query.data == "allsearchphoto"
+        ),
     )
+
 
     start_send_photo_handler = MessageHandler(
         send_photo,

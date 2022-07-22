@@ -44,7 +44,7 @@ def progress(current, total,client,message,name):
 
 def zip_ya(start_dir):
     start_dir = start_dir  # 要压缩的文件夹路径
-    file_news = start_dir + '.zip'  # 压缩后文件夹的名字
+    file_news = f'{start_dir}.zip'
     z = zipfile.ZipFile(file_news, 'w', zipfile.ZIP_DEFLATED)
     for dir_path, dir_names, file_names in os.walk(start_dir):
         f_path = dir_path.replace(start_dir, '')  # 这一句很重要，不replace的话，就从根目录开始复制
@@ -162,55 +162,40 @@ async def download_nhentai_id_call(client, call):
             client.delete_message(info.chat.id, info.message_id)
             os.system("rm '" + name + "'")
 
-        elif choice=="tele" :
+        elif choice=="tele":
             img_list = []
             name_list = []
 
             filelists = os.listdir(path)
-            sort_num_first = list(filelists)
-
-            sort_num_first.sort()
+            sort_num_first = sorted(filelists)
             sorted_file = []
             for sort_num in sort_num_first:
-                for file in filelists:
-                    if str(sort_num) == file:
-                        sorted_file.append( file)
-
+                sorted_file.extend(file for file in filelists if str(sort_num) == file)
             for file in sorted_file:
-                    try:
-                        if "jpg" not in str(file) and "png" not in str(file):
-                            continue
-                        file_dir = os.path.join(path, file)
-                        print(file_dir, file)
-
-                        if os.path.getsize(file_dir) < 1024 * 512 * 10:
-                            print(file_dir, file)
-
-                            info = telegraph.upload.upload_file(file_dir)
-                            url = "https://telegra.ph" + info[0]
-
-                            name_list.append(file)
-                            img_list.append(url)
-                        else:
-                            file_dir = compress_image(outfile=file_dir, mb=5000)
-                            print(file_dir, file)
-                            info = telegraph.upload.upload_file(file_dir)
-                            url = "https://telegra.ph" + info[0]
-
-                            name_list.append(file)
-                            img_list.append(url)
-
-
-
-                    except Exception as e:
-                        print(f"标记4 {e}")
-
-                        sys.stdout.flush()
+                try:
+                    if "jpg" not in str(file) and "png" not in str(file):
                         continue
+                    file_dir = os.path.join(path, file)
+                    print(file_dir, file)
+
+                    if os.path.getsize(file_dir) >= 1024 * 512 * 10:
+                        file_dir = compress_image(outfile=file_dir, mb=5000)
+                    print(file_dir, file)
+
+                    info = telegraph.upload.upload_file(file_dir)
+                    url = f"https://telegra.ph{info[0]}"
+
+                    img_list.append(url)
+                    name_list.append(file)
+                except Exception as e:
+                    print(f"标记4 {e}")
+
+                    sys.stdout.flush()
+                    continue
             try:
                 put_text = ""
-                for  b in img_list:
-                    put_text = put_text + f"<strong></strong><br /><img src=\"{b}\" /><br>\n\n"
+                for b in img_list:
+                    put_text = f'{put_text}<strong></strong><br /><img src=\"{b}\" /><br>\n\n'
                 print(put_text)
 
                 put_url = put_telegraph(title=f"{os.path.basename(path)}", md_text=put_text)

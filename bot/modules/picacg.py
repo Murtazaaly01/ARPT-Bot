@@ -31,12 +31,7 @@ def wake_clock():
 def hmacsha256(key, string):
     key = bytes(key, encoding="utf8")
     string = bytes(string, encoding="utf8")
-    signature = hmac.new(
-        key,
-        msg=string,
-        digestmod=hashlib.sha256
-    ).hexdigest()
-    return signature
+    return hmac.new(key, msg=string, digestmod=hashlib.sha256).hexdigest()
 
 # 密钥计算函数
 def password(url, method, time, nonce):
@@ -66,7 +61,7 @@ def del_path(path):
 
 def zip_ya(start_dir):
     start_dir = start_dir  # 要压缩的文件夹路径
-    file_news = start_dir + '.zip'  # 压缩后文件夹的名字
+    file_news = f'{start_dir}.zip'
     z = zipfile.ZipFile(file_news, 'w', zipfile.ZIP_DEFLATED)
     for dir_path, dir_names, file_names in os.walk(start_dir):
         f_path = dir_path.replace(start_dir, '')  # 这一句很重要，不replace的话，就从根目录开始复制
@@ -80,10 +75,10 @@ def getheaders(nurl, mothed):
     try:
         global Mytoken
         timestr = str(int(time.time()))
-        url = "https://picaapi.picacomic.com/" + nurl
+        url = f"https://picaapi.picacomic.com/{nurl}"
         nonce = str(uuid.uuid1()).replace("-", "")
         sign = password(nurl, mothed, timestr, nonce)
-        headers = {
+        return {
             "api-key": "C69BAF41DA5ABD1FFEDC6D2FEA56B",
             "accept": "application/vnd.picacomic.com.v1+json",
             "app-channel": "1",
@@ -97,9 +92,9 @@ def getheaders(nurl, mothed):
             "app-build-version": "45",
             "Content-Type": "application/json; charset=UTF-8",
             "User-Agent": "okhttp/3.8.1",
+            "authorization": Mytoken,
         }
-        headers.update({"authorization": Mytoken})
-        return headers
+
     except:
         print("获取headers失败")
 
@@ -110,7 +105,7 @@ def loginpic():
         timestr = str(int(time.time()))
         nurl = "auth/sign-in"
         mothed = "POST"
-        url = "https://picaapi.picacomic.com/" + nurl
+        url = f"https://picaapi.picacomic.com/{nurl}"
         nonce = str(uuid.uuid1()).replace("-", "")
         sign = password(nurl, mothed, timestr, nonce)
         headers = {
@@ -138,9 +133,8 @@ def loginpic():
         if mytoken.json()['message'] == "success":
             print("登陆成功")
             Mytoken = mytoken.json()['data']['token']
-            f1 = open('token.txt', 'w')
-            f1.write(Mytoken)
-            f1.close()
+            with open('token.txt', 'w') as f1:
+                f1.write(Mytoken)
         else:
             print("登录失败")
             sys.stdout.flush()
@@ -152,9 +146,8 @@ def check():
     try:
         global Mytoken
         try:
-            f = open('token.txt')
-            Mytoken = f.read()
-            f.close()
+            with open('token.txt') as f:
+                Mytoken = f.read()
         except:
             file = open('token.txt', 'w')
             file.close()
@@ -163,7 +156,7 @@ def check():
         timestr = str(int(time.time()))
         nurl = "categories"
         mothed = "GET"
-        url = "https://picaapi.picacomic.com/" + nurl
+        url = f"https://picaapi.picacomic.com/{nurl}"
         nonce = str(uuid.uuid1()).replace("-", "")
         sign = password(nurl, mothed, timestr, nonce)
         headers = {
@@ -180,8 +173,9 @@ def check():
             "app-build-version": "45",
             "Content-Type": "application/json; charset=UTF-8",
             "User-Agent": "okhttp/3.8.1",
+            "authorization": Mytoken,
         }
-        headers.update({"authorization": Mytoken})
+
         # shou_url="https://picaapi.picacomic.com/users/favourite?s=dd&page=1"
         # main_url="https://picaapi.picacomic.com/categories"
         main_html = requests.get(url=url, headers=headers, verify=False)
@@ -214,7 +208,7 @@ def down(url, imgname, title):
         path = title
         if not os.path.exists(path):
             os.mkdir(path)
-        for ci in range(3):
+        for _ in range(3):
             try:
                 r = requests.get(url, headers=headers)
                 if r.status_code != 404:
@@ -251,10 +245,10 @@ def downmany(url, imgname, title, zhang):
         path = title
         if not os.path.exists(path):
             os.mkdir(path)
-        path = title + "/" + zhang
+        path = f"{title}/{zhang}"
         if not os.path.exists(path):
             os.mkdir(path)
-        for ci in range(3):
+        for _ in range(3):
             try:
                 r = requests.get(url, headers=headers)
                 if r.status_code != 404:
@@ -296,7 +290,7 @@ def seach(client, message):
         }
         nurl = "comics/advanced-search?page=1"
         headers = getheaders(nurl, "POST")
-        url = "https://picaapi.picacomic.com/" + nurl
+        url = f"https://picaapi.picacomic.com/{nurl}"
         main_html = requests.post(url=url, headers=headers, data=json.dumps(PostData), verify=False)
         # print(main_html.text)
         for img_json in main_html.json()["data"]["comics"]["docs"]:
@@ -313,16 +307,13 @@ def seach(client, message):
 
             new_inline_keyboard = [
                 [
+                    InlineKeyboardButton(text="上传网盘", callback_data="down"),
                     InlineKeyboardButton(
-                        text="上传网盘",
-                        callback_data=f"down"
+                        text="发送本子到TG", callback_data="tgdown"
                     ),
-                    InlineKeyboardButton(
-                        text="发送本子到TG",
-                        callback_data=f"tgdown"
-                    )
                 ]
             ]
+
 
             new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
             client.send_photo(chat_id=message.chat.id, photo=img_url, caption=text, reply_markup=new_reply_markup)
@@ -343,95 +334,95 @@ def progress(current, total,client,message,name):
 
 def add_download(client,call):
 
-        import re
-        check()
-        caption = str(call.message.caption)
-        comicid = re.findall("book_id:(.*)", caption, re.S)[0]
-        title = re.findall("title:(.*?)\n", caption, re.S)[0]
+    import re
+    check()
+    caption = str(call.message.caption)
+    comicid = re.findall("book_id:(.*)", caption, re.S)[0]
+    title = re.findall("title:(.*?)\n", caption, re.S)[0]
 
-        message_id = call.message.message_id
-        message_chat_id = call.message.chat.id
+    message_id = call.message.message_id
+    message_chat_id = call.message.chat.id
 
-        title = title.replace(" ", "").replace("\\", "").replace("/", "").replace("|", "").replace(" ", "")
-        mulu_page = 1
-        info=client.send_message(chat_id=message_chat_id, text=" 开始下载")
+    title = title.replace(" ", "").replace("\\", "").replace("/", "").replace("|", "").replace(" ", "")
+    mulu_page = 1
+    info=client.send_message(chat_id=message_chat_id, text=" 开始下载")
 
-        #已下载话数
-        hua_down_num=0
+    #已下载话数
+    hua_down_num=0
 
-        while True:
+    while True:
 
-            nurl = "comics/" + str(comicid) + f"/eps?page={mulu_page}"
-            url = "https://picaapi.picacomic.com/" + nurl
-            headers = getheaders(nurl, "GET")
-            # shou_url="https://picaapi.picacomic.com/users/favourite?s=dd&page=1"
-            # main_url="https://picaapi.picacomic.com/categories"
-            main_html = requests.get(url=url, headers=headers, verify=False)
-            data=main_html.json()["data"]["eps"]["total"]
-            print(main_html.text)
-            benzihua_num=main_html.json()["data"]["eps"]["total"]
-            print(f"本子话数{benzihua_num}")
-            sys.stdout.flush()
+        nurl = f"comics/{str(comicid)}" + f"/eps?page={mulu_page}"
+        url = f"https://picaapi.picacomic.com/{nurl}"
+        headers = getheaders(nurl, "GET")
+        # shou_url="https://picaapi.picacomic.com/users/favourite?s=dd&page=1"
+        # main_url="https://picaapi.picacomic.com/categories"
+        main_html = requests.get(url=url, headers=headers, verify=False)
+        data=main_html.json()["data"]["eps"]["total"]
+        print(main_html.text)
+        benzihua_num=main_html.json()["data"]["eps"]["total"]
+        print(f"本子话数{benzihua_num}")
+        sys.stdout.flush()
 
 
 
-            for eps in main_html.json()['data']['eps']['docs']:
+        for eps in main_html.json()['data']['eps']['docs']:
 
-                epsid = eps['order']
-                page = 1
-                img_name = 1
-                zhang = eps["title"]
-                wake_clock()
-                download_process_text=f"当前下载话:{zhang}\n" \
-                                      f"下载进度:{hua_down_num}/{benzihua_num}\n"
+            epsid = eps['order']
+            page = 1
+            img_name = 1
+            zhang = eps["title"]
+            wake_clock()
+            download_process_text=f"当前下载话:{zhang}\n" \
+                                  f"下载进度:{hua_down_num}/{benzihua_num}\n"
 
-                client.edit_message_text(text=download_process_text,chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown')
+            client.edit_message_text(text=download_process_text,chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown')
 
                 #该循环下载单话
-                while True:
-                    nurl = "comics/" + str(comicid) + "/order/" + str(epsid) + "/pages?page=" + str(page)
+            while True:
+                nurl = f"comics/{str(comicid)}/order/{str(epsid)}/pages?page={str(page)}"
 
-                    url = "https://picaapi.picacomic.com/" + nurl
-                    headers = getheaders(nurl, "GET")
-                    img = requests.get(url=url, headers=headers, verify=False)
-                    img_lu = img.json()["data"]["pages"]["docs"]
-                    for picture in img_lu:
-                        img_url = str(picture['media']['fileServer']) + "/static/" + str(picture['media']['path'])
-                        print(img_name)
-                        print(img_url)
-                        downmany(img_url, img_name, title, zhang)
-                        img_name = img_name + 1
-                    page = page + 1
-                    print(img.json()["data"]["pages"]["page"])
-                    print(img.json()["data"]["pages"]["pages"])
+                url = f"https://picaapi.picacomic.com/{nurl}"
+                headers = getheaders(nurl, "GET")
+                img = requests.get(url=url, headers=headers, verify=False)
+                img_lu = img.json()["data"]["pages"]["docs"]
+                for picture in img_lu:
+                    img_url = str(picture['media']['fileServer']) + "/static/" + str(picture['media']['path'])
+                    print(img_name)
+                    print(img_url)
+                    downmany(img_url, img_name, title, zhang)
+                    img_name = img_name + 1
+                page = page + 1
+                print(img.json()["data"]["pages"]["page"])
+                print(img.json()["data"]["pages"]["pages"])
 
-                    print(f"该话页数")
+                print("该话页数")
 
-                    if img.json()["data"]["pages"]["page"] == img.json()["data"]["pages"]["pages"]:
+                if img.json()["data"]["pages"]["page"] == img.json()["data"]["pages"]["pages"]:
 
-                        break
-                hua_down_num=hua_down_num+1
+                    break
+            hua_down_num=hua_down_num+1
 
 
-            book_pages = int(main_html.json()["data"]["eps"]["pages"])
-            if book_pages == mulu_page:
-                break
-            mulu_page = mulu_page + 1
-        print("开始压缩")
+        book_pages = int(main_html.json()["data"]["eps"]["pages"])
+        if book_pages == mulu_page:
+            break
+        mulu_page = mulu_page + 1
+    print("开始压缩")
+    sys.stdout.flush()
+    name = zip_ya(title)
+    print(name)
+    print("压缩完成，开始上传")
+    del_path(title)
+    try:
+        run_rclone(dir=f"/{name}",title=title,info=info,file_num=1,client=client,message=call,gid=0)
+        print("uploading")
+    except Exception as e:
+        print(f"{e}")
         sys.stdout.flush()
-        name = zip_ya(title)
-        print(name)
-        print("压缩完成，开始上传")
-        del_path(title)
-        try:
-            run_rclone(dir=f"/{name}",title=title,info=info,file_num=1,client=client,message=call,gid=0)
-            print("uploading")
-        except Exception as e:
-            print(f"{e}")
-            sys.stdout.flush()
-            client.send_message(message_chat_id, text="文件上传失败")
-        client.delete_message(message_chat_id, message_id)
-        os.system("rm '" + name + "'")
+        client.send_message(message_chat_id, text="文件上传失败")
+    client.delete_message(message_chat_id, message_id)
+    os.system("rm '" + name + "'")
 
 
 def add_downloadtg(client, call):
@@ -453,8 +444,8 @@ def add_downloadtg(client, call):
 
     while True:
 
-        nurl = "comics/" + str(comicid) + f"/eps?page={mulu_page}"
-        url = "https://picaapi.picacomic.com/" + nurl
+        nurl = f"comics/{str(comicid)}" + f"/eps?page={mulu_page}"
+        url = f"https://picaapi.picacomic.com/{nurl}"
         headers = getheaders(nurl, "GET")
         # shou_url="https://picaapi.picacomic.com/users/favourite?s=dd&page=1"
         # main_url="https://picaapi.picacomic.com/categories"
@@ -480,9 +471,9 @@ def add_downloadtg(client, call):
 
             # 该循环下载单话
             while True:
-                nurl = "comics/" + str(comicid) + "/order/" + str(epsid) + "/pages?page=" + str(page)
+                nurl = f"comics/{str(comicid)}/order/{str(epsid)}/pages?page={str(page)}"
 
-                url = "https://picaapi.picacomic.com/" + nurl
+                url = f"https://picaapi.picacomic.com/{nurl}"
                 headers = getheaders(nurl, "GET")
                 img = requests.get(url=url, headers=headers, verify=False)
                 img_lu = img.json()["data"]["pages"]["docs"]
@@ -496,7 +487,7 @@ def add_downloadtg(client, call):
                 print(img.json()["data"]["pages"]["page"])
                 print(img.json()["data"]["pages"]["pages"])
 
-                print(f"该话页数")
+                print("该话页数")
 
                 if img.json()["data"]["pages"]["page"] == img.json()["data"]["pages"]["pages"]:
                     break

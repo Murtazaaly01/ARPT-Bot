@@ -62,7 +62,7 @@ def progress(current, total,client,message,name):
 
 def zip_ya(start_dir):
     start_dir = start_dir  # 要压缩的文件夹路径
-    file_news = start_dir + '.zip'  # 压缩后文件夹的名字
+    file_news = f'{start_dir}.zip'
     z = zipfile.ZipFile(file_news, 'w', zipfile.ZIP_DEFLATED)
     for dir_path, dir_names, file_names in os.walk(start_dir):
         f_path = dir_path.replace(start_dir, '')  # 这一句很重要，不replace的话，就从根目录开始复制
@@ -87,8 +87,7 @@ def getPicUrl(url):
     soup_2 = BeautifulSoup(content_2, 'lxml')
     imgs = soup_2.find_all(id="img")
     for img in imgs:
-        picSrc = img['src']
-        return picSrc
+        return img['src']
 
 async def getWebsite(url, time1, spath,pagenum,client, info):
 
@@ -104,30 +103,30 @@ async def getWebsite(url, time1, spath,pagenum,client, info):
     for div in divs:
         picUrl = div.a.get('href')
         page = page + 1
-        print('下载中 ' + new_title2 + str(page) + '.jpg')
+        print(f'下载中 {new_title2}{str(page)}.jpg')
 
 
         try:
             saveFile(getPicUrl(picUrl), spath + new_title2 + '/' + str(page).zfill(3) + '.jpg')
-            print('下载成功: ' + new_title2 + str(page) + '.jpg')
+            print(f'下载成功: {new_title2}{str(page)}.jpg')
             barop = progessbar(page, pagenum)
             text=f"下载进度:\n{barop}"
             await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                            parse_mode='markdown')
 
         except:
-            print('无法下载' + new_title2 + str(page) + '.jpg')
+            print(f'无法下载{new_title2}{str(page)}.jpg')
         else:
             print('成功')
             i = i + 1
-    print('成功 下载' + str(page) + ' 个文件,' + str(i))
+    print(f'成功 下载{str(page)} 个文件,{str(i)}')
     endTime1 = time.time()
     m, s = divmod(int(endTime1 - time1), 60)
     h, m = divmod(m, 60)
     print("%02d时%02d分%02d秒" % (h, m, s))
     if h != 0:
         last_time = "%d时%d分%d秒" % (h, m, s)
-    elif h == 0 and m != 0:
+    elif m != 0:
         last_time = "%d分%d秒" % (m, s)
     else:
         last_time = "%d秒" % s
@@ -135,8 +134,7 @@ async def getWebsite(url, time1, spath,pagenum,client, info):
     text=f"下载完成:`{new_title2}`\n成功下载:`{str(page)}个文件`，耗时：`{last_time}`"
     await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                    parse_mode='markdown')
-    filepath=spath + new_title2
-    return filepath
+    return spath + new_title2
 
 
 async def single_download_call(client, call):

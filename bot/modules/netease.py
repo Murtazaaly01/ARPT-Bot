@@ -40,17 +40,17 @@ def get_free_space_mb():
     giga=1000*1000*1000
     total_size=total_blocks*block_size/giga
     free_size=free_blocks*block_size/giga
-    print('total_size = %s' % int(total_size))
-    print('free_size = %s' % free_size)
+    print(f'total_size = {int(total_size)}')
+    print(f'free_size = {free_size}')
     return int(free_size)
 
 def hum_convert(value):
     value=float(value)
     units = ["B", "KB", "MB", "GB", "TB", "PB"]
     size = 1024.0
-    for i in range(len(units)):
+    for unit in units:
         if (value / size) < 1:
-            return "%.2f%s" % (value, units[i])
+            return "%.2f%s" % (value, unit)
         value = value / size
 
 
@@ -66,7 +66,7 @@ async def search_song_list(client, message):
         text=f"歌曲搜索结果:\n"
         for a in list(search_song_info.json()['result']['songs']):
             print(f"{num}-`{a['name']}-{a['artists'][0]['name']}`\n")
-            text=text+f"{num}-`{a['name']}-{a['artists'][0]['name']}`\n"
+            text = f"{text}{num}-`{a['name']}-{a['artists'][0]['name']}`\n"
             temp_list.append(InlineKeyboardButton(
                     text=f"{num}",
                     callback_data=f"editsong {a['id']}"
@@ -132,10 +132,7 @@ def add_flac_cover(filename, albumart):
 
     image = Picture()
     image.type = 3
-    if albumart.endswith('png'):
-        mime = 'image/png'
-    else:
-        mime = 'image/jpg'
+    mime = 'image/png' if albumart.endswith('png') else 'image/jpg'
     image.desc = 'front cover'
     with open(albumart, 'rb') as f:  # better than open(albumart, 'rb').read() ?
         image.data = f.read()
@@ -220,10 +217,7 @@ def downloadplaylist(client, call):
     print(song_list_info.json())
     print(song_list_info.json()['playlist']['name'])
     song_list = list(song_list_info.json()['playlist']['trackIds'])
-    song_id_list = []
-
-    for a in song_list:
-        song_id_list.append(str(a['id']))
+    song_id_list = [str(a['id']) for a in song_list]
 
     path = f"/playlist{playlist}/"
     if not os.path.exists(path):  # 看是否有该文件夹，没有则创建文件夹
@@ -233,10 +227,14 @@ def downloadplaylist(client, call):
         song_info_url = f"https://benchaonetease.vercel.app/song/url?id={song_id}"
         song_info = requests.get(url=song_info_url, headers=headers)
         try:
-            if song_info.json()['data'][0]['url'] == None:
-                client.edit_message_text(text=f"此歌曲不支持获取歌曲链接", chat_id=info.chat.id,
-                                         message_id=info.message_id,
-                                         parse_mode='markdown')
+            if song_info.json()['data'][0]['url'] is None:
+                client.edit_message_text(
+                    text="此歌曲不支持获取歌曲链接",
+                    chat_id=info.chat.id,
+                    message_id=info.message_id,
+                    parse_mode='markdown',
+                )
+
                 continue
             url = song_info.json()['data'][0]['url']
         except Exception as e:
@@ -264,15 +262,15 @@ def downloadplaylist(client, call):
         try:
             start = time.time()  # 下载开始时间
             response = requests.get(url, stream=True)
-            size = 0  # 初始化已下载大小
-            chunk_size = 2048  # 每次下载的数据大小
-            content_size = int(response.headers['content-length'])  # 下载文件总大小
-        
             if response.status_code == 200:  # 判断是否响应成功
+                chunk_size = 2048  # 每次下载的数据大小
+                content_size = int(response.headers['content-length'])  # 下载文件总大小
+
                 print('Start download,[File size]:{size:.2f} MB'.format(
                     size=content_size / chunk_size / 1024))  # 开始下载，显示下载文件大小
                 filepath = path + song_name  # 设置图片name，注：必须加上扩展名
                 temp = time.time()
+                size = 0  # 初始化已下载大小
                 with open(filepath, 'wb') as file:  # 显示进度条
                     for data in response.iter_content(chunk_size=chunk_size):
                         file.write(data)
@@ -296,9 +294,7 @@ def downloadplaylist(client, call):
                                   file_name=song_name, thumb=picpath, title=song_name, progress=progress,
                                   progress_args=(client, info, song_name,))
                 os.remove(filepath)
-                os.remove(picpath)
-            else:
-                os.remove(picpath)
+            os.remove(picpath)
         except Exception as e:
             print(f'Error! {e}')
             client.edit_message_text(text=f'Error! `{e}`', chat_id=info.chat.id,
@@ -389,9 +385,9 @@ async def get_song_list_info(client, message):
         text=f"歌单名称:`{song_list_info.json()['playlist']['name']}`\n" \
              f"歌曲数:`{list_num}`\n" \
              f"只显示前15条\n"
-        for a in song_info_list :
+        for a in song_info_list:
 
-            text=text+f"{num}-`{a['name']}-{a['ar'][0]['name']}`\n"
+            text = f"{text}{num}-`{a['name']}-{a['ar'][0]['name']}`\n"
             if num==15:
                 break
             num=num+1

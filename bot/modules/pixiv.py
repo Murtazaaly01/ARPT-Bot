@@ -46,7 +46,7 @@ def compress_image(outfile, mb, quality=85, k=0.9):
             dir, suffix = os.path.splitext(outfile)
             os.remove(outfile)
             #print(outfile)
-            outfile = '{}{}'.format(dir, suffix)
+            outfile = f'{dir}{suffix}'
             out.save(outfile, quality=quality)
         except Exception as e:
             print(e)

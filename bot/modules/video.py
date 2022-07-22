@@ -92,10 +92,14 @@ class Download_video():
             elif "mp3" in self.call.data:
                 tem, suffix = os.path.splitext(video_name)
                 print(tem, suffix)  # test   .py
-                self.client.edit_message_text(text=f"开始转码", chat_id=self.info.chat.id,
-                                              message_id=self.info.message_id,
-                                              parse_mode='markdown')
-                audio_name = tem + ".mp3"
+                self.client.edit_message_text(
+                    text="开始转码",
+                    chat_id=self.info.chat.id,
+                    message_id=self.info.message_id,
+                    parse_mode='markdown',
+                )
+
+                audio_name = f"{tem}.mp3"
                 os.system(f"ffmpeg -i \"{video_name}\" -f mp3 -vn \"{audio_name}\"")
                 run_rclone(f"/{audio_name}", audio_name, info=self.info, file_num=1, client=self.client, message=self.info,gid=0)
                 os.remove(video_name)
@@ -113,10 +117,14 @@ class Download_video():
             elif "mp3" in self.call.data:
                 tem, suffix = os.path.splitext(video_name)
                 print(tem, suffix)  # test   .py
-                self.client.edit_message_text(text=f"开始转码", chat_id=self.info.chat.id,
-                                              message_id=self.info.message_id,
-                                              parse_mode='markdown')
-                audio_name = tem + ".mp3"
+                self.client.edit_message_text(
+                    text="开始转码",
+                    chat_id=self.info.chat.id,
+                    message_id=self.info.message_id,
+                    parse_mode='markdown',
+                )
+
+                audio_name = f"{tem}.mp3"
                 os.system(f"ffmpeg -i \"{video_name}\" -f mp3 -vn \"{audio_name}\"")
                 self.client.send_audio(chat_id=self.call.message.chat.id, audio=f"/{audio_name}", progress=progress,
                                        progress_args=(self.client, self.info, audio_name,))
@@ -163,35 +171,29 @@ def get_video_info(client, message, url):
 
     new_inline_keyboard = [
         [
-            InlineKeyboardButton(
-                text="上传网盘",
-                callback_data=f"videorclone"
-            ),
-            InlineKeyboardButton(
-                text=f"发送给我",
-                callback_data=f"videotg"
-            )
+            InlineKeyboardButton(text="上传网盘", callback_data="videorclone"),
+            InlineKeyboardButton(text="发送给我", callback_data="videotg"),
         ],
         [
-            InlineKeyboardButton(
-                text="上传网盘(mp3)",
-                callback_data=f"mp3rclone"
-            ),
-            InlineKeyboardButton(
-                text=f"发送给我(mp3)",
-                callback_data=f"mp3tg"
-            )
-        ]
-
+            InlineKeyboardButton(text="上传网盘(mp3)", callback_data="mp3rclone"),
+            InlineKeyboardButton(text="发送给我(mp3)", callback_data="mp3tg"),
+        ],
     ]
+
     img = requests.get(url=video_img)
     img_name = f"{message.chat.id}{message.message_id}.png"
     with open(img_name, 'wb') as f:
         f.write(img.content)
         f.close()
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
-    client.send_photo(caption=text[0:1024], photo=img_name, chat_id=message.chat.id,
-                      parse_mode='markdown', reply_markup=new_reply_markup)
+    client.send_photo(
+        caption=text[:1024],
+        photo=img_name,
+        chat_id=message.chat.id,
+        parse_mode='markdown',
+        reply_markup=new_reply_markup,
+    )
+
     os.remove(img_name)
 
 
